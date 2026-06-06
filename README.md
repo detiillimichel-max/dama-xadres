@@ -26,3 +26,6 @@ Jogo de Damas com troca de regras Brasileira ↔ Americana.
 - `script.js`
 
 Feito em HTML/CSS/JS puro.
+
+© 2026 Michel Detilli. Todos os direitos reservados. 
+É permitido jogar online. É proibida a cópia, distribuição ou uso comercial do código sem autorização.
