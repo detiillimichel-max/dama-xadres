@@ -2,7 +2,7 @@ class DamasGame {
   constructor() {
     this.size = 8;
     this.board = [];
-    this.current = 1; // 1 = player, -1 = computer
+    this.current = 1;
     this.selected = null;
     this.legalMoves = [];
     this.history = [];
@@ -105,7 +105,6 @@ class DamasGame {
     const dirs = [[-1,-1],[-1,1],[1,-1],[1,1]];
     const forward = player===1? [[-1,-1],[-1,1]] : [[1,-1],[1,1]];
 
-    // Capturas
     const capDirs = isKing || this.rules==='brasileira'? dirs : forward;
     for(const [dr,dc] of capDirs){
       if(isKing && this.rules==='brasileira'){
@@ -113,24 +112,22 @@ class DamasGame {
         while(this.inBounds(nr,nc) && this.board[nr][nc]===0){ nr+=dr; nc+=dc; }
         if(!this.inBounds(nr,nc)) continue;
         if(this.board[nr][nc]*player<0){
-          let lr=nr+dr, lc=nc+dc;
-          while(this.inBounds(lr,lc) && this.board[lr][lc]===0){
-            const seq = this.simulateCapture(r,c,lr,lc,nr,nc,player);
+          const lr=nr+dr, lc=nc+dc;
+          if(this.inBounds(lr,lc) && this.board[lr][lc]===0){
+            const seq = this.simulateCapture(r,c,lr,lc,nr,nc,player,0);
             if(seq) captures.push(seq);
-            lr+=dr; lc+=dc;
           }
         }
       }else{
         const mr=r+dr, mc=c+dc, lr=r+2*dr, lc=c+2*dc;
         if(this.inBounds(lr,lc) && this.board[mr][mc]*player<0 && this.board[lr][lc]===0){
-          const seq = this.simulateCapture(r,c,lr,lc,mr,mc,player);
+          const seq = this.simulateCapture(r,c,lr,lc,mr,mc,player,0);
           if(seq) captures.push(seq);
         }
       }
     }
     if(captures.length) return {moves:[],captures};
 
-    // Movimentos simples
     const moveDirs = isKing? dirs : forward;
     for(const [dr,dc] of moveDirs){
       if(isKing && this.rules==='brasileira'){
@@ -149,7 +146,8 @@ class DamasGame {
     return {moves,captures};
   }
 
-  simulateCapture(fr,fc,tr,tc,cr,cc,player){
+  simulateCapture(fr,fc,tr,tc,cr,cc,player,depth){
+    if(depth>12) return null;
     const boardCopy = this.board.map(row=>row.slice());
     const piece = boardCopy[fr][fc];
     boardCopy[fr][fc]=0;
@@ -159,7 +157,7 @@ class DamasGame {
       newPiece = player*2;
     }
     boardCopy[tr][tc]=newPiece;
-    const further = this.findFurtherCaptures(tr,tc,boardCopy,player);
+    const further = this.findFurtherCaptures(tr,tc,boardCopy,player,depth+1);
     if(further.length){
       const best = further.reduce((a,b)=>a.captures.length>=b.captures.length?a:b);
       return {
@@ -171,7 +169,8 @@ class DamasGame {
     return {from:[fr,fc],to:[tr,tc],captures:[[cr,cc]]};
   }
 
-  findFurtherCaptures(r,c,board,player){
+  findFurtherCaptures(r,c,board,player,depth){
+    if(depth>12) return [];
     const piece = board[r][c];
     const isKing = this.isKing(piece);
     const dirs = isKing || this.rules==='brasileira'? [[-1,-1],[-1,1],[1,-1],[1,1]] : (player===1?[[-1,-1],[-1,1]]:[[1,-1],[1,1]]);
@@ -182,17 +181,16 @@ class DamasGame {
         while(this.inBounds(nr,nc) && board[nr][nc]===0){nr+=dr;nc+=dc;}
         if(!this.inBounds(nr,nc)) continue;
         if(board[nr][nc]*player<0){
-          let lr=nr+dr, lc=nc+dc;
-          while(this.inBounds(lr,lc) && board[lr][lc]===0){
+          const lr=nr+dr, lc=nc+dc;
+          if(this.inBounds(lr,lc) && board[lr][lc]===0){
             const nb=board.map(row=>row.slice());
             nb[r][c]=0; nb[nr][nc]=0; nb[lr][lc]=piece;
-            const deeper=this.findFurtherCaptures(lr,lc,nb,player);
+            const deeper=this.findFurtherCaptures(lr,lc,nb,player,depth+1);
             if(deeper.length){
               results.push({to:deeper[0].to,captures:[[nr,nc],...deeper[0].captures]});
             }else{
               results.push({to:[lr,lc],captures:[[nr,nc]]});
             }
-            lr+=dr; lc+=dc;
           }
         }
       }else{
@@ -200,7 +198,7 @@ class DamasGame {
         if(this.inBounds(lr,lc) && board[mr][mc]*player<0 && board[lr][lc]===0){
           const nb=board.map(row=>row.slice());
           nb[r][c]=0; nb[mr][mc]=0; nb[lr][lc]=piece;
-          const deeper=this.findFurtherCaptures(lr,lc,nb,player);
+          const deeper=this.findFurtherCaptures(lr,lc,nb,player,depth+1);
           if(deeper.length){
             results.push({to:deeper[0].to,captures:[[mr,mc],...deeper[0].captures]});
           }else{
@@ -214,18 +212,22 @@ class DamasGame {
 
   render(){
     this.boardEl.innerHTML='';
+    const allMoves = this.current===1? this.getAllMoves(1) : [];
+    const mustCapture = allMoves.some(m=>m.captures.length);
+    const captureFrom = new Set(allMoves.filter(m=>m.captures.length).map(m=>m.from[0]+','+m.from[1]));
+
     for(let r=0;r<8;r++){
       for(let c=0;c<8;c++){
         const sq=document.createElement('div');
         sq.className=`square ${(r+c)%2===0?'light':'dark'}`;
         if((r+c)%2===1) sq.classList.add('playable');
-        sq.dataset.r=r; sq.dataset.c=c;
         const piece=this.board[r][c];
         if(piece!==0){
           const p=document.createElement('div');
           const color = piece>0? this.playerColor : this.computerColor;
           p.className=`piece ${color} ${this.isKing(piece)?'king':''}`;
           if(this.selected && this.selected[0]===r && this.selected[1]===c) p.classList.add('selected');
+          if(mustCapture && piece>0 && captureFrom.has(r+','+c)) p.classList.add('selected');
           sq.appendChild(p);
         }
         const isTarget=this.legalMoves.some(m=>m.to[0]===r && m.to[1]===c);
