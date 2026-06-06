@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Damas Raiz</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>♟️ Damas Raiz ♟️</h1>
+    <div class="topbar">
+      <div class="score">
+        <span>Você</span>
+        <strong id="score-red">0</strong>
+      </div>
+      <div class="vs">VS</div>
+      <div class="score">
+        <span>Computador</span>
+        <strong id="score-black">0</strong>
+      </div>
+    </div>
+  </header>
+
+  <div class="status" id="status">Sua vez! Regra: Brasileira</div>
+
+  <div class="board-wrap">
+    <div id="board" class="board"></div>
+  </div>
+
+  <div class="controls">
+    <button id="btn-new" class="btn primary">Novo Jogo</button>
+    <button id="btn-rule" class="btn">Regra: Brasileira</button>
+    <button id="btn-undo" class="btn">Desfazer</button>
+  </div>
+
+  <div class="legend">
+    <span><i class="dot red"></i> Você</span>
+    <span><i class="dot black"></i> Computador</span>
+    <span>• Captura obrigatória</span>
+  </div>
+</div>
+<script src="script.js"></script>
+</body>
+</html>
