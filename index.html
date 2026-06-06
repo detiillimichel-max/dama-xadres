@@ -12,18 +12,18 @@
     <h1>♟️ Damas Raiz ♟️</h1>
     <div class="topbar">
       <div class="score">
-        <span>Você</span>
-        <strong id="score-red">0</strong>
+        <span id="label-player">Você</span>
+        <strong id="score-player">0</strong>
       </div>
       <div class="vs">VS</div>
       <div class="score">
-        <span>Computador</span>
-        <strong id="score-black">0</strong>
+        <span id="label-computer">Computador</span>
+        <strong id="score-computer">0</strong>
       </div>
     </div>
   </header>
 
-  <div class="status" id="status">Sua vez! Regra: Brasileira</div>
+  <div class="status" id="status">Sua vez!</div>
 
   <div class="board-wrap">
     <div id="board" class="board"></div>
@@ -35,9 +35,32 @@
     <button id="btn-undo" class="btn">Desfazer</button>
   </div>
 
+  <div class="color-pickers">
+    <label>
+      Sua cor:
+      <select id="color-player">
+        <option value="red">Vermelha</option>
+        <option value="white">Branca</option>
+        <option value="green">Verde</option>
+        <option value="yellow">Amarela</option>
+        <option value="blue">Azul</option>
+      </select>
+    </label>
+    <label>
+      Cor do oponente:
+      <select id="color-computer">
+        <option value="blue">Azul</option>
+        <option value="white">Branca</option>
+        <option value="green">Verde</option>
+        <option value="red">Vermelha</option>
+        <option value="yellow">Amarela</option>
+      </select>
+    </label>
+  </div>
+
   <div class="legend">
-    <span><i class="dot red"></i> Você</span>
-    <span><i class="dot black"></i> Computador</span>
+    <span><i class="dot" id="dot-player"></i> Você</span>
+    <span><i class="dot" id="dot-computer"></i> Oponente</span>
     <span>• Captura obrigatória</span>
   </div>
 </div>
